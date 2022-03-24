@@ -1,7 +1,7 @@
 #pct <- c(63,13,24)
 
 
-docpad <- '/Users/fhaot/Documents/Big Data/Project big data/NISTDB4-F.csv'
+docpad <- 'data/NISTDB4-F.csv'
 doc <- read.csv(docpad, header = 0)
 names(doc)
 length(names(doc))

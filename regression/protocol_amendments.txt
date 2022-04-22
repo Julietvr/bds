@@ -1,0 +1,3 @@
+- added two dimensionality reduction techniques: X and Y (forgotten in original protocol).
+- y2 cannot be inferred. entries are removed.
+- train-test split is done as a first step

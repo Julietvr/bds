@@ -1,2 +1,8 @@
 - Scalability
     - Saving feature sets would not be an option
+
+
+- While the dataset is large, it is possible to load in memory.
+- Problematic is, the model size.
+- If it is desired to start from all fts, which is 530 at the beginning, it's too large.
+- 

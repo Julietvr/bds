@@ -16,7 +16,7 @@ def read_data(filename):
     return new
 
 
-def get_fold(dataset, kind, fold_nr=0):
+def get_fold(dataset, kind, fold_nr=0, seed=42):
     """
     returns part of the data you need for the analysis
     kind =  training tuning test or toy
@@ -26,7 +26,6 @@ def get_fold(dataset, kind, fold_nr=0):
     """
     # fixed choices
     p_test = 0.2
-    seed = 42
     folds = 10
     var_y = 'y'
     # split test

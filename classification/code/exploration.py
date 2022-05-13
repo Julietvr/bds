@@ -77,17 +77,15 @@ def draw_info_missing(counts_na, n_all, lim_m, type_rc, ax_m, msg_mi):
             ax_m.annotate(info.rm[type_rc] + msg_mi, (0.25, 0.9), xycoords='axes fraction', va='center', fontsize=8)
 
 
-def count_concentrations(var, threshold):
-    tab = var.value_counts()
-    return tab.where(tab > threshold).dropna()
-
-
-def get_concentrations(data_x, lim_c, excl_int=False):
-    nr_concentrated = pd.Series([sum(count_concentrations(data_x[nm], lim_c)) for nm in data_x.columns])
-    nr_concentrated.index = data_x.columns
-    data_types = data_x.dtypes
-    cols = data_types.where(data_types != 'int64').dropna().index if excl_int else data_types.index
-    all_cc = dict([(nm, count_concentrations(data_x[nm], lim_c)) for nm in cols])
+def get_concentrations(data_x, lim_c, col_names=None):
+    cols = data_x.columns if col_names is None else col_names
+    all_cc = dict()
+    nr_concentrated = pd.Series(0, index=data_x.columns)
+    for nm in cols:
+        frequencies = data_x[nm].value_counts()
+        nm_cc = frequencies.where(frequencies > lim_c).dropna()
+        all_cc.update(dict(((nm, ci), cv) for ci, cv in zip(nm_cc.index,nm_cc)))
+        nr_concentrated.loc[nm] = sum(nm_cc)
     return nr_concentrated, all_cc
 
 
@@ -223,7 +221,7 @@ def info_fold(data_x, data_y,pct_mi=0.5, pct_cc=0.05, dist_out=10, n_pc=5):
     ct_na_row, ct_na_col, na_rm_c, cst_rm_c, na_rm_r = get_info_missing(data_x, max_missing)
     ct_dup = data_x.duplicated().sum()
     ct_cc_col, dct_cc = get_concentrations(data_x, max_concentration)
-    ct_flags_cc = sum([len(val) for key, val in dct_cc.items()])
+    ct_flags_cc = len(dct_cc)
     df_lim = get_outlier_lim(data_x, threshold=dist_out)
     rm_c = list(na_rm_c) + list(cst_rm_c)
     cl_data_x, df_outliers, ct_r_rm_out = remove_outliers(data_x, df_lim, rm_c)

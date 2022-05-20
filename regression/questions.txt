@@ -1,2 +1,0 @@
-- can exploration be applied to the whole dataset? or only to test set?
-- are we interested in a negative relation between variables as well?

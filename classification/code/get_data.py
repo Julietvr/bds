@@ -8,7 +8,7 @@ from sklearn.model_selection import StratifiedKFold,train_test_split
 def read_data(filename):
     """
     reads filename into panda dataframe
-    give names to columns
+    gives names to columns, last column is response variable y
     """
     new = pd.read_csv(filename, header=None)
     nr_y_col = new.shape[1] - 1
@@ -21,8 +21,9 @@ def get_fold(dataset, kind, fold_nr=0, seed=42):
     returns part of the data you need for the analysis
     kind =  training tuning test or toy
     Seed is fixed, stratified sampling,
-    test = 20%, 10 folds
-    returns tuple (X,y)
+    test = 20%, tr_tu = 80% stratified train test split
+    tr_tu is split up in 10 folds Stratified K-fold
+    returns tuple (df_x, df_y)
     """
     # fixed choices
     p_test = 0.2
@@ -34,7 +35,7 @@ def get_fold(dataset, kind, fold_nr=0, seed=42):
         df_y = test[var_y]
         df_x = test.drop(var_y, axis=1)
         return df_x, df_y
-    # split folds
+    # split tr_tu in folds
     kfs = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
     split = list(kfs.split(tr_tu, tr_tu[var_y]))
     if kind == 'training':

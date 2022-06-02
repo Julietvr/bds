@@ -5,8 +5,9 @@ from sklearn.decomposition import PCA, KernelPCA
 
 def ctg_cors_with_y(data_x, y):
     """
-    approximation for degree of correlation: cov(x,y)/ sd(x) instead of cov(x,y)/[sd(x)), sd(y)]
-    fit x ~ y and return fit_ssq(x)/total_ssq(x)
+    used in best representatives
+    approximation for degree of correlation as sd(y) is unknown in cov(x,y)/[sd(x)), sd(y)]
+    fit x_hat = mean(x | y) and return fitted_ssq/total_ssq
     """
     overall_means = data_x.mean()
     total_ssq = ((data_x - overall_means)**2).sum()
@@ -14,8 +15,6 @@ def ctg_cors_with_y(data_x, y):
     counts_per_y_value = y.value_counts()
     fitted_ssq = ((means_per_y_value - overall_means)**2).apply(lambda col: col * counts_per_y_value).sum()
     return fitted_ssq/total_ssq
-
-
 
 
 def best_representatives(train_data_x, train_data_y, min_cor, method='pearson', rm_small=0):

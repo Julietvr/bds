@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.manifold import MDS
 from Project_classification.code.get_data import read_data
+from Project_classification.code.exploration import rm_ticks
 from Project_classification.code.preprocessing import prepare_the_data
 from Project_classification.code.evaluation import get_predictions, table_metrics,  hp_complete
 
@@ -30,6 +31,7 @@ nm_files = sorted(os.listdir('../data'))
 all_scores = []
 fig0 = plt.figure(0, figsize=(12.0, 9.0))
 fig1 = plt.figure(1, figsize=(12.0, 9.0))
+ax_legend = plt.subplot2grid((3, 2), (2, 1), fig=fig1)
 for idx, hp_i in final_parameters.iterrows():
     nr_file = int(hp_i.file)
     print(nr_file)
@@ -43,20 +45,27 @@ for idx, hp_i in final_parameters.iterrows():
     all_scores.append(table_metrics(clean_val_y, y_hat_class, y_hat_prob))
 
     # plot: confusion matrix
-    ax_i = plt.subplot2grid((3, 2), (int(idx/2), idx % 2), fig=fig0)
+    ax_i = plt.subplot2grid((3, 2), (int(nr_file/2), nr_file % 2), fig=fig0)
+
     ax_i.set_title(nm_files[nr_file].split('.')[0], fontsize=8)
     cf_mat = ConfusionMatrixDisplay.from_predictions(clean_val_y, y_hat_class, ax=ax_i)
+    if nr_file < 3:
+        rm_ticks(ax_i,rm_x=True, rm_y=False)
 
     # plot: visualization
     embedding = MDS(n_components=2)
     prob_transformed = embedding.fit_transform(y_hat_prob)
-    ax_mds = plt.subplot2grid((3, 2), (int(idx/2), idx % 2), fig=fig1)
+    ax_mds = plt.subplot2grid((3, 2), (int(nr_file/2), nr_file % 2), fig=fig1)
     colors = ["purple", "navy", "cornflowerblue", "magenta", "teal"]
     dc_col = dict(zip(clean_val_y.value_counts().index, colors))
     col_y = [dc_col[y] if y == y_h else 'white' for y, y_h in zip(clean_val_y, y_hat_class)]
     ecol_y = [dc_col[y] for y in clean_val_y]
     ax_mds.scatter(x=prob_transformed[:, 0], y=prob_transformed[:, 1], c=col_y, edgecolors=ecol_y)
-    ax_mds.set_title(nm_files[nr_file].split('.')[0], fontsize=8)
+    ax_mds.set_title('File ' + str(nr_file) + ': ' + nm_files[nr_file].split('.')[0], fontsize=8)
+
+    ord_lab, ord_col = zip(*sorted(dc_col.items()))
+    ax_legend.scatter(x=range(5), y= [nr_file]*5, c= ord_col)
+
 
 # output final metrics (all performance measures), visualisation af fit and confusion matrix
 metrics_final = pd.DataFrame(all_scores).round(4)
@@ -65,8 +74,13 @@ metrics_final['file'] = [hp_i.file for _, hp_i in final_parameters.iterrows()]
 metrics_final['full_model'] = [hp_i.full_model for _, hp_i in final_parameters.iterrows()]
 metrics_final.to_csv('../final/final_metrics.csv')
 
-fig1.suptitle('Visualisation of validation set')
-plt.savefig('../final/visualisation validation set.pdf')
+ax_legend.set_xticks(ticks=range(5), labels=ord_lab)
+ax_legend.set_title('Legend (empty points are misclassified)', fontsize=8)
+ax_legend.set_xlabel('Class')
+ax_legend.set_ylabel('File')
+
+fig1.suptitle('Visualisation of the final model: test set')
+plt.savefig('../final/visualisation test set.pdf')
 plt.close(fig1)
 
 fig0.suptitle('Confusion matrix for final models')
